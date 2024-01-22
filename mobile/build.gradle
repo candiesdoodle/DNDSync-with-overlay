@@ -9,8 +9,8 @@ android {
         applicationId "it.silleellie.dndsync"
         minSdk 26
         targetSdk 31
-        versionCode 5
-        versionName "3.0"
+        versionCode 2
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
