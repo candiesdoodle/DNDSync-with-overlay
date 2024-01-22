@@ -26,8 +26,9 @@
             app:summary="@string/sync_bedtime_desc" />
 
         <SwitchPreferenceCompat
-            app:dependency="bedtime_sync_key"
             app:key="power_save_key"
+            app:iconSpaceReserved="false"
+            app:enabled="false"
             app:title="@string/enable_power_saving_title"
             app:summary="@string/enable_power_saving_desc"
             app:defaultValue="false"/>
