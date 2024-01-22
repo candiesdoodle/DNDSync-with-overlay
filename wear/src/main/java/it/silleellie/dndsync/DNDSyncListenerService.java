@@ -2,15 +2,15 @@ package it.silleellie.dndsync;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import androidx.annotation.NonNull;
-import androidx.preference.PreferenceManager;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
+
+import org.apache.commons.lang3.SerializationUtils;
 
 public class DNDSyncListenerService extends WearableListenerService {
     private static final String TAG = "DNDSyncListenerService";
@@ -21,79 +21,71 @@ public class DNDSyncListenerService extends WearableListenerService {
 
         if (messageEvent.getPath().equalsIgnoreCase(DND_SYNC_MESSAGE_PATH)) {
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             Log.d(TAG, "received path: " + DND_SYNC_MESSAGE_PATH);
 
+            // data is now a PhoneSignal object, it must be deserialized
             byte[] data = messageEvent.getData();
-            // data[0] contains dnd mode of phone
-            // 0 = INTERRUPTION_FILTER_UNKNOWN
-            // 1 = INTERRUPTION_FILTER_ALL (all notifications pass)
-            // 2 = INTERRUPTION_FILTER_PRIORITY
-            // 3 = INTERRUPTION_FILTER_NONE (no notification passes)
-            // 4 = INTERRUPTION_FILTER_ALARMS
-            // Custom
-            // 5 = BedTime Mode On
-            // 6 = BedTime Mode Off
-            byte dndStatePhone = data[0];
-            Log.d(TAG, "dndStatePhone: " + dndStatePhone);
+            PhoneSignal phoneSignal = SerializationUtils.deserialize(data);
+
+            Log.d(TAG, "dndStatePhone: " + phoneSignal.dndState);
 
             // get dnd state
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            int currentDndState = mNotificationManager.getCurrentInterruptionFilter();
 
-            int filterState = mNotificationManager.getCurrentInterruptionFilter();
-            if (filterState < 0 || filterState > 4) {
-                Log.d(TAG, "DNDSync weird current dnd state: " + filterState);
-            }
-            byte currentDndState = (byte) filterState;
             Log.d(TAG, "currentDndState: " + currentDndState);
+            if (currentDndState < 0 || currentDndState > 4) {
+                Log.d(TAG, "Current DND state it's weird, should be in range [0,4]");
+            }
 
-            if ((0 <= dndStatePhone && dndStatePhone <= 4) && dndStatePhone != currentDndState) {
+            if (phoneSignal.dndState != null && phoneSignal.dndState == currentDndState) {
+                return;
+            } else if (phoneSignal.dndState != null && phoneSignal.dndState != currentDndState) {
 
-                Log.d(TAG, "dndStatePhone != currentDndState: " + dndStatePhone + " != " + currentDndState);
+                Log.d(TAG, "dndStatePhone != currentDndState: " + phoneSignal.dndState + " != " + currentDndState);
 
-                if (mNotificationManager.isNotificationPolicyAccessGranted()) {
-                    mNotificationManager.setInterruptionFilter(dndStatePhone);
-                    Log.d(TAG, "DND set to " + dndStatePhone);
-                } else {
-                    Log.d(TAG, "attempting to set DND but access not granted");
-                }
+                changeDndSetting(mNotificationManager, phoneSignal.dndState);
 
-                boolean vibrate = prefs.getBoolean("vibrate_key", false);
-                Log.d(TAG, "vibrate: " + vibrate);
-                if (vibrate) {
+                Log.d(TAG, "vibrate: " + phoneSignal.vibratePref);
+                if (phoneSignal.vibratePref) {
                     vibrate();
                 }
 
-            } else if (dndStatePhone == 5 || dndStatePhone == 6) {
+            }
 
-                boolean useBedtimeMode = prefs.getBoolean("bedtime_key", false);
-                Log.d(TAG, "useBedtimeMode: " + useBedtimeMode);
-                if (useBedtimeMode) {
+            int currentBedtimeState = Settings.Global.getInt(
+                    getApplicationContext().getContentResolver(), "setting_bedtime_mode_running_state", 0);
+            Log.d(TAG, "currentBedtimeState: " + currentBedtimeState);
 
-                    int newSetting = (dndStatePhone == 5) ? 1 : 0;
+            if (phoneSignal.bedtimeState != null && phoneSignal.bedtimeState != currentBedtimeState) {
 
-                    boolean bedtimeModeSuccess = changeBedtimeSetting(newSetting);
-                    if (bedtimeModeSuccess) {
-                        Log.d(TAG, "Bedtime mode value toggled");
+                Log.d(TAG, "bedtimeStatePhone != currentBedtimeState: " + phoneSignal.bedtimeState + " != " + currentBedtimeState);
+
+                // activating/disabling bedtime also activates/disables dnd, just like
+                // when activating bedtime manually from the watch.
+                // dndState = 2 means it's activated, dndState = 1 means it's disabled
+                int dndState = phoneSignal.bedtimeState == 1 ? 2 : 1;
+                changeDndSetting(mNotificationManager, dndState);
+
+                boolean bedtimeModeSuccess = changeBedtimeSetting(phoneSignal.bedtimeState);
+                if (bedtimeModeSuccess) {
+                    Log.d(TAG, "Bedtime mode value toggled");
+                } else {
+                    Log.d(TAG, "Bedtime mode toggle failed");
+                }
+
+                if(phoneSignal.powersavePref) {
+
+                    boolean powerModeSuccess = changePowerModeSetting(phoneSignal.bedtimeState);
+                    if(powerModeSuccess) {
+                        Log.d(TAG, "Power Saver mode toggled");
                     } else {
-                        Log.d(TAG, "Bedtime mode toggle failed");
-                    }
-
-                    boolean usePowerSaverMode = prefs.getBoolean("power_saver_key", false);
-                    if(usePowerSaverMode) {
-
-                        boolean powerModeSuccess = changePowerModeSetting(newSetting);
-                        if(powerModeSuccess) {
-                            Log.d(TAG, "Power Saver mode toggled");
-                        } else {
-                            Log.d(TAG, "Power Saver mode toggle failed");
-                        }
+                        Log.d(TAG, "Power Saver mode toggle failed");
                     }
                 }
 
-                boolean vibrate = prefs.getBoolean("vibrate_key", false);
-                Log.d(TAG, "vibrate: " + vibrate);
-                if (vibrate) {
+                Log.d(TAG, "vibrate: " + phoneSignal.vibratePref);
+                if (phoneSignal.vibratePref) {
                     vibrate();
                 }
             }
@@ -101,6 +93,17 @@ public class DNDSyncListenerService extends WearableListenerService {
         } else {
             super.onMessageReceived(messageEvent);
         }
+    }
+
+    private void changeDndSetting(NotificationManager mNotificationManager, int newSetting) {
+
+        if (mNotificationManager.isNotificationPolicyAccessGranted()) {
+            mNotificationManager.setInterruptionFilter(newSetting);
+            Log.d(TAG, "DND set to " + newSetting);
+        } else {
+            Log.d(TAG, "attempting to set DND but access not granted");
+        }
+
     }
 
     private boolean changeBedtimeSetting(int newSetting) {
