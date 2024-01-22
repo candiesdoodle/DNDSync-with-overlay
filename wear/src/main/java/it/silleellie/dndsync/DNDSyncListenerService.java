@@ -39,8 +39,12 @@ public class DNDSyncListenerService extends WearableListenerService {
             }
 
             if (phoneSignal.dndState != null && phoneSignal.dndState == currentDndState) {
+                // avoid issue that happens due to redundant signal propagation:
+                // if dnd_as_bedtime and watch_sync_dnd are activated, when dnd is activated
+                // from the watch, dnd is activated to the phone and then bedtime is activated
+                // back on the watch. This early return avoids that.
                 return;
-            } else if (phoneSignal.dndState != null && phoneSignal.dndState != currentDndState) {
+            } else if (phoneSignal.dndState != null) {
 
                 Log.d(TAG, "dndStatePhone != currentDndState: " + phoneSignal.dndState + " != " + currentDndState);
 
