@@ -6,7 +6,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "de.rhaeus.dndsync"
+        applicationId "it.silleellie.dndsync"
         minSdk 30
         targetSdk 31
         versionCode 4

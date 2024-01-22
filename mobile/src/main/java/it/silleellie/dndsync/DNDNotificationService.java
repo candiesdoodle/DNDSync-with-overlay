@@ -1,18 +1,11 @@
-package de.rhaeus.dndsync;
+package it.silleellie.dndsync;
 
 
-import android.content.ComponentName;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
@@ -34,24 +27,7 @@ public class DNDNotificationService extends NotificationListenerService {
     public void onListenerConnected() {
         Log.d(TAG, "listener connected");
         running = true;
-
-        //TODO enable/disable service based on app setting to save battery
-//        // We don't want to run a background service so disable and stop it
-//        // to avoid running this service in the background
-//        disableServiceComponent();
-//        Log.i(TAG, "Disabling service");
-//
-//        try {
-//            stopSelf();
-//        } catch(SecurityException e) {
-//            Log.e(TAG, "Failed to stop service");
-//        }
     }
-//    private void disableServiceComponent() {
-//        PackageManager p = getPackageManager();
-//        ComponentName componentName = new ComponentName(this, DNDNotificationService.class);
-//        p.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-//    }
 
     @Override
     public void onListenerDisconnected() {
@@ -59,6 +35,57 @@ public class DNDNotificationService extends NotificationListenerService {
         running = false;
     }
 
+    private boolean isWindDownNotification(StatusBarNotification sbn) {
+        return sbn.getPackageName().equals("com.google.android.apps.wellbeing") &&
+                sbn.getNotification().getChannelId().equals("wind_down_notifications");
+    }
+
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn){
+
+        if(isWindDownNotification(sbn)) {
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean syncBedTime = prefs.getBoolean("bedtime_sync_key", true);
+
+            if(syncBedTime) {
+                // depending on the number of actions that can be done, bedtime mode
+                // could be in "pause mode" or "on mode":
+                // * If it is in "pause" mode, there is only one action ("Restart bedtime")
+                // * If it is in "on" mode, there are two actions possible ("Pause it" and "De-activate it")
+                boolean is_on = sbn.getNotification().actions.length == 2;
+                boolean is_paused = sbn.getNotification().actions.length == 1;
+
+                if (is_on) {
+                    // 5 means bedtime ON
+                    Log.d(TAG, "bedtime mode is on");
+                    int interruptionFilter = 5;
+                    new Thread(() -> sendDNDSync(interruptionFilter)).start();
+                } else if (is_paused) {
+                    // 6 means bedtime OFF
+                    Log.d(TAG, "bedtime mode is off");
+                    int interruptionFilter = 6;
+                    new Thread(() -> sendDNDSync(interruptionFilter)).start();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn){
+        // if notifications is removed, we want surely to disable bedtime mode
+        if(isWindDownNotification(sbn)) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean syncBedTime = prefs.getBoolean("bedtime_sync_key", true);
+
+            if (syncBedTime) {
+                // 6 means bedtime OFF
+                Log.d(TAG, "bedtime mode is off");
+                int interruptionFilter = 6;
+                new Thread(() -> sendDNDSync(interruptionFilter)).start();
+            }
+        }
+    }
 
     @Override
     public void onInterruptionFilterChanged (int interruptionFilter) {
@@ -67,11 +94,7 @@ public class DNDNotificationService extends NotificationListenerService {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean syncDnd = prefs.getBoolean("dnd_sync_key", true);
         if(syncDnd) {
-            new Thread(new Runnable() {
-                public void run() {
-                    sendDNDSync(interruptionFilter);
-                }
-            }).start();
+            new Thread(() -> sendDNDSync(interruptionFilter)).start();
         }
     }
 
@@ -79,7 +102,7 @@ public class DNDNotificationService extends NotificationListenerService {
         // https://developer.android.com/training/wearables/data/messages
 
         // search nodes for sync
-        CapabilityInfo capabilityInfo = null;
+        CapabilityInfo capabilityInfo;
         try {
             capabilityInfo = Tasks.await(
                     Wearable.getCapabilityClient(this).getCapability(
@@ -103,24 +126,14 @@ public class DNDNotificationService extends NotificationListenerService {
         } else {
             for (Node node : connectedNodes) {
                 if (node.isNearby()) {
-                    byte[] data = new byte[2];
+                    byte[] data = new byte[1];
                     data[0] = (byte) dndState;
                     Task<Integer> sendTask =
                             Wearable.getMessageClient(this).sendMessage(node.getId(), DND_SYNC_MESSAGE_PATH, data);
 
-                    sendTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
-                        @Override
-                        public void onSuccess(Integer integer) {
-                            Log.d(TAG, "send successful! Receiver node id: " + node.getId());
-                        }
-                    });
+                    sendTask.addOnSuccessListener(integer -> Log.d(TAG, "send successful! Receiver node id: " + node.getId()));
 
-                    sendTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "send failed! Receiver node id: " + node.getId());
-                        }
-                    });
+                    sendTask.addOnFailureListener(e -> Log.d(TAG, "send failed! Receiver node id: " + node.getId()));
                 }
             }
         }

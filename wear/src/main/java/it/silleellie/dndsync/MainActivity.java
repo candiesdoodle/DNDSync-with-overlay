@@ -1,4 +1,4 @@
-package de.rhaeus.dndsync;
+package it.silleellie.dndsync;
 
 import android.os.Bundle;
 
