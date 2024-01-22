@@ -126,7 +126,7 @@ public class DNDSyncListenerService extends WearableListenerService {
                 getApplicationContext().getContentResolver(), "sm_connectivity_disable", newSetting);
 
         // screen timeout should be set to 10000 also, and ambient_tilt_to_wake should be set to 0
-        // but previous variables in those 2 cases must be stored and they do not seem to stick
+        // but previous variable states in those 2 cases must be stored and they do not seem to stick
         // and they are not so much important tbh (ambient tilt to wake is disabled anyways)
 
         return lowPower && restrictedDevicePerformance
