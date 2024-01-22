@@ -1,4 +1,4 @@
-package it.silleellie.dndsync;
+package it.silleellie.dndsync.shared;
 
 import java.io.Serializable;
 

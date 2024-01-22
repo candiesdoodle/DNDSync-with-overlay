@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'it.silleellie.dndsync'
+    namespace 'it.silleellie.dndsync.shared'
     compileSdk 31
 
     defaultConfig {

@@ -13,6 +13,8 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 import org.apache.commons.lang3.SerializationUtils;
 
+import it.silleellie.dndsync.shared.WearSignal;
+
 public class DNDSyncListenerService extends WearableListenerService {
     private static final String TAG = "DNDSyncListenerService";
     private static final String DND_SYNC_MESSAGE_PATH = "/wear-dnd-sync";

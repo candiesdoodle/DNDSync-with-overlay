@@ -16,6 +16,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import it.silleellie.dndsync.shared.WearSignal;
+
 public class DNDNotificationService extends NotificationListenerService {
     private static final String TAG = "DNDNotificationService";
     private static final String DND_SYNC_CAPABILITY_NAME = "dnd_sync";
