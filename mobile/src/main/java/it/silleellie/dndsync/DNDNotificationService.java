@@ -21,20 +21,6 @@ public class DNDNotificationService extends NotificationListenerService {
     private static final String DND_SYNC_CAPABILITY_NAME = "dnd_sync";
     private static final String DND_SYNC_MESSAGE_PATH = "/wear-dnd-sync";
 
-    public static boolean running = false;
-
-    @Override
-    public void onListenerConnected() {
-        Log.d(TAG, "listener connected");
-        running = true;
-    }
-
-    @Override
-    public void onListenerDisconnected() {
-        Log.d(TAG, "listener disconnected");
-        running = false;
-    }
-
     private boolean isWindDownNotification(StatusBarNotification sbn) {
         return sbn.getPackageName().equals("com.google.android.apps.wellbeing") &&
                 sbn.getNotification().getChannelId().equals("wind_down_notifications");
