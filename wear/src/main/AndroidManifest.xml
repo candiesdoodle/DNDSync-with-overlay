@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-          package="de.rhaeus.dndsync">
+          package="it.silleellie.dndsync">
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
@@ -19,7 +19,7 @@
         android:theme="@style/Theme.DNDSync"
         >
         <activity
-            android:name=".MainActivity"
+            android:name="it.silleellie.dndsync.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +40,7 @@
             android:value="false" />
 
         <service
-            android:name=".DNDSyncListenerService"
+            android:name="it.silleellie.dndsync.DNDSyncListenerService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -53,9 +53,9 @@
             </intent-filter>
         </service>
 
-        <!-- grant permission with: adb shell cmd notification allow_listener de.rhaeus.dndsync/de.rhaeus.dndsync.DNDNotificationService -->
+        <!-- grant permission with: adb shell cmd notification allow_listener it.silleellie.dndsync/it.silleellie.dndsync.DNDNotificationService -->
         <service
-            android:name=".DNDNotificationService"
+            android:name="it.silleellie.dndsync.DNDNotificationService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
