@@ -8,7 +8,15 @@
             app:key="dnd_sync_key"
             app:iconSpaceReserved="false"
             app:defaultValue="true"
-            app:title="@string/sync_title" />
+            app:title="@string/sync_dnd_title"
+            app:summary="@string/sync_dnd_desc" />
+
+        <SwitchPreferenceCompat
+            app:dependency="dnd_sync_key"
+            app:key="dnd_as_bedtime_key"
+            app:title="@string/sync_dnd_as_bedtime_title"
+            app:summary="@string/sync_dnd_as_bedtime_desc"
+            app:defaultValue="false" />
 
         <SwitchPreferenceCompat
             app:key="bedtime_sync_key"
