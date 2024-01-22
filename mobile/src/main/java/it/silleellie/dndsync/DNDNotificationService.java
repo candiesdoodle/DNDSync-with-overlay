@@ -13,6 +13,7 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import org.apache.commons.lang3.SerializationUtils;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -46,12 +47,12 @@ public class DNDNotificationService extends NotificationListenerService {
                     // 5 means bedtime ON
                     Log.d(TAG, "bedtime mode is on");
                     int interruptionFilter = 5;
-                    new Thread(() -> sendDNDSync(interruptionFilter)).start();
+                    new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
                 } else if (is_paused) {
                     // 6 means bedtime OFF
                     Log.d(TAG, "bedtime mode is off");
                     int interruptionFilter = 6;
-                    new Thread(() -> sendDNDSync(interruptionFilter)).start();
+                    new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
                 }
             }
         }
@@ -68,7 +69,7 @@ public class DNDNotificationService extends NotificationListenerService {
                 // 6 means bedtime OFF
                 Log.d(TAG, "bedtime mode is off");
                 int interruptionFilter = 6;
-                new Thread(() -> sendDNDSync(interruptionFilter)).start();
+                new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
             }
         }
     }
@@ -79,12 +80,13 @@ public class DNDNotificationService extends NotificationListenerService {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean syncDnd = prefs.getBoolean("dnd_sync_key", true);
+
         if(syncDnd) {
-            new Thread(() -> sendDNDSync(interruptionFilter)).start();
+            new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
         }
     }
 
-    private void sendDNDSync(int dndState) {
+    private void sendDNDSync(PhoneSignal phoneSignal) {
         // https://developer.android.com/training/wearables/data/messages
 
         // search nodes for sync
@@ -112,8 +114,8 @@ public class DNDNotificationService extends NotificationListenerService {
         } else {
             for (Node node : connectedNodes) {
                 if (node.isNearby()) {
-                    byte[] data = new byte[1];
-                    data[0] = (byte) dndState;
+
+                    byte[] data = SerializationUtils.serialize(phoneSignal);
                     Task<Integer> sendTask =
                             Wearable.getMessageClient(this).sendMessage(node.getId(), DND_SYNC_MESSAGE_PATH, data);
 
