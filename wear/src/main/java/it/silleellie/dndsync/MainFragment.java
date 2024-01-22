@@ -9,41 +9,30 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreferenceCompat;
 
 public class MainFragment extends PreferenceFragmentCompat {
     private Preference dndPref;
-    private Preference bedtimePref;
     private Preference secureSettingsPref;
-    private Preference powerSaverMode;
-
-
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
         dndPref = findPreference("dnd_permission_key");
-        bedtimePref = findPreference("bedtime_key");
         secureSettingsPref = findPreference("secure_settings_permission_key");
-        powerSaverMode = findPreference("power_saver_key");
 
-        dndPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                if (!checkDNDPermission()) {
-                    Toast.makeText(getContext(), "Follow the instructions to grant the permission via ADB!", Toast.LENGTH_SHORT).show();
-                }
-                return true;
+        dndPref.setOnPreferenceClickListener(preference -> {
+            if (!checkDNDPermission()) {
+                Toast.makeText(getContext(), "Follow the instructions to grant the permission via ADB!", Toast.LENGTH_SHORT).show();
             }
+            return true;
         });
 
-        secureSettingsPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                if (!checkSecureSettingsPermission(getContext())) {
-                    Toast.makeText(getContext(), "Follow the instructions to grant the permission via ADB!", Toast.LENGTH_SHORT).show();
-                }
-                return true;
+        secureSettingsPref.setOnPreferenceClickListener(preference -> {
+            if (!checkSecureSettingsPermission(getContext())) {
+                Toast.makeText(getContext(), "Follow the instructions to grant the permission via ADB!", Toast.LENGTH_SHORT).show();
             }
+            return true;
         });
 
         checkDNDPermission();

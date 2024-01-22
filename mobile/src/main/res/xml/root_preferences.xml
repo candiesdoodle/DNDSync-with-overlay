@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     app:iconSpaceReserved="false">
 
-    <PreferenceCategory app:title="@string/sync_header"
+    <PreferenceCategory app:title="@string/phone_sync_header"
         app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
@@ -11,10 +11,37 @@
             app:title="@string/sync_title" />
 
         <SwitchPreferenceCompat
-                app:key="bedtime_sync_key"
-                app:iconSpaceReserved="false"
-                app:defaultValue="true"
-                app:title="@string/sync_bedtime_title" />
+            app:key="bedtime_sync_key"
+            app:iconSpaceReserved="false"
+            app:defaultValue="false"
+            app:title="@string/sync_bedtime_title"
+            app:summary="@string/sync_bedtime_desc" />
+
+        <SwitchPreferenceCompat
+            app:dependency="bedtime_sync_key"
+            app:key="power_save_key"
+            app:title="@string/enable_power_saving_title"
+            app:summary="@string/enable_power_saving_desc"
+            app:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/watch_sync_header"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="watch_dnd_sync_key"
+            app:iconSpaceReserved="false"
+            app:defaultValue="true"
+            app:title="@string/watch_sync_dnd_title"
+            app:summary="@string/watch_sync_dnd_desc" />
+
+        <SwitchPreferenceCompat
+            app:key="watch_vibrate_key"
+            app:iconSpaceReserved="false"
+            app:defaultValue="false"
+            app:title="@string/watch_vibrate_title"
+            app:summary="@string/watch_vibrate_desc" />
 
     </PreferenceCategory>
 
