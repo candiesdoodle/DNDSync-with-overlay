@@ -1,24 +1,17 @@
 package it.silleellie.dndsync;
 
 
-import android.content.ComponentName;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.preference.PreferenceManager;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -64,18 +57,12 @@ public class DNDNotificationService extends NotificationListenerService {
     public void onInterruptionFilterChanged (int interruptionFilter) {
         Log.d(TAG, "interruption filter changed to " + interruptionFilter);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean syncDnd = prefs.getBoolean("dnd_sync_key", true);
-        if(syncDnd) {
-            new Thread(new Runnable() {
-                public void run() {
-                    sendDNDSync(interruptionFilter);
-                }
-            }).start();
-        }
+        // preferences are now stored on the mobile app, so we send the signal nonetheless
+        // and if the user ticked the relative option then it is synced to the phone
+        new Thread(() -> sendDNDSync(new WearSignal(interruptionFilter))).start();
     }
 
-    private void sendDNDSync(int dndState) {
+    private void sendDNDSync(WearSignal wearSignal) {
         // https://developer.android.com/training/wearables/data/messages
 
         // search nodes for sync
@@ -103,24 +90,17 @@ public class DNDNotificationService extends NotificationListenerService {
         } else {
             for (Node node : connectedNodes) {
                 if (node.isNearby()) {
-                    byte[] data = new byte[2];
-                    data[0] = (byte) dndState;
+                    byte[] data = SerializationUtils.serialize(wearSignal);
                     Task<Integer> sendTask =
                             Wearable.getMessageClient(this).sendMessage(node.getId(), DND_SYNC_MESSAGE_PATH, data);
 
-                    sendTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
-                        @Override
-                        public void onSuccess(Integer integer) {
-                            Log.d(TAG, "send successful! Receiver node id: " + node.getId());
-                        }
-                    });
+                    sendTask.addOnSuccessListener(integer ->
+                            Log.d(TAG, "send successful! Receiver node id: " + node.getId())
+                    );
 
-                    sendTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "send failed! Receiver node id: " + node.getId());
-                        }
-                    });
+                    sendTask.addOnFailureListener(e ->
+                            Log.d(TAG, "send failed! Receiver node id: " + node.getId())
+                    );
                 }
             }
         }
