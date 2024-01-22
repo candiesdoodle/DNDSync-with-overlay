@@ -49,7 +49,7 @@ and to [@DreadedLama](https://github.com/DreadedLama) for the initial developing
 <img src="/images/wear_1.png" width="200" />
 
 Setting up the watch is a bit more *tricky* since the watch OS lacks the permission screen for DND access,
-but the permission needed can be **easily set via ADB***!
+but the permission needed can be **easily set via ADB**!
 
 Note: This is only tested on my **Galaxy Watch 4** and it might not work on other devices!
 1. Connect the watch to your computer via **adb** (watch and computer have to be in the *same network!*)
