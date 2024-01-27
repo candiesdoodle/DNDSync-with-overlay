@@ -64,7 +64,7 @@ Note: This is only tested on my **Galaxy Watch 4** and it might not work on othe
 2. Install the app `dndsync-wear.apk` on the watch
     * Run `adb install dndsync-wear.apk`
 3. Grant permission for **DND access** (*This allows the app to listen to DND changes and to change the DND setting*)
-    * Run `adb shell cmd notification allow_listener it.silleellie.dndsync/it.silleellie.DNDNotificationService`  
+    * Run `adb shell cmd notification allow_listener it.silleellie.dndsync/it.silleellie.dndsync.DNDNotificationService`  
 4. Grant permission for **Secure Setting access** (*This allows the app to change BedTime mode setting on the watch*)
     * Run `adb shell pm grant it.silleellie.dndsync android.permission.WRITE_SECURE_SETTINGS`
 5. Open the app on the watch, scroll to the permission section and check if both `DND Permission` 
