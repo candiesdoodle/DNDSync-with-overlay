@@ -59,8 +59,20 @@ public class DNDSyncListenerService extends WearableListenerService {
 
             }
 
+            String settingBedtimeStr = "setting_bedtime_mode_running_state";
             int currentBedtimeState = Settings.Global.getInt(
-                    getApplicationContext().getContentResolver(), "setting_bedtime_mode_running_state", 0);
+                    getApplicationContext().getContentResolver(), settingBedtimeStr, -1);
+
+            if (currentBedtimeState != -1) {
+                Log.d(TAG, "watch is the galaxy watch");
+            } else {
+                Log.d(TAG, "watch is not the galaxy watch");
+
+                settingBedtimeStr = "bedtime_mode";
+                currentBedtimeState = Settings.Global.getInt(
+                        getApplicationContext().getContentResolver(), settingBedtimeStr, -1);
+            }
+
             Log.d(TAG, "currentBedtimeState: " + currentBedtimeState);
 
             if (phoneSignal.bedtimeState != null && phoneSignal.bedtimeState != currentBedtimeState) {
@@ -73,7 +85,7 @@ public class DNDSyncListenerService extends WearableListenerService {
                 int dndState = phoneSignal.bedtimeState == 1 ? 2 : 1;
                 changeDndSetting(mNotificationManager, dndState);
 
-                boolean bedtimeModeSuccess = changeBedtimeSetting(phoneSignal.bedtimeState);
+                boolean bedtimeModeSuccess = changeBedtimeSetting(settingBedtimeStr, phoneSignal.bedtimeState);
                 if (bedtimeModeSuccess) {
                     Log.d(TAG, "Bedtime mode value toggled");
                 } else {
@@ -112,10 +124,10 @@ public class DNDSyncListenerService extends WearableListenerService {
 
     }
 
-    private boolean changeBedtimeSetting(int newSetting) {
+    private boolean changeBedtimeSetting(String settingBedtimeStr, int newSetting) {
 
         boolean bedtimeModeSuccess = Settings.Global.putInt(
-                getApplicationContext().getContentResolver(), "setting_bedtime_mode_running_state", newSetting);
+                getApplicationContext().getContentResolver(), settingBedtimeStr, newSetting);
         boolean zenModeSuccess = Settings.Global.putInt(
                 getApplicationContext().getContentResolver(), "zen_mode", newSetting);
 
