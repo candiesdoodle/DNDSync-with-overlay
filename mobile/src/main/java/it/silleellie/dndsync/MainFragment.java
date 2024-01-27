@@ -30,6 +30,11 @@ public class MainFragment extends PreferenceFragmentCompat {
         assert(bedtimeSync != null);
         assert(powerSave != null);
 
+        // right at the start of app we should check if the powersave toggle should be enabled
+        if(dndAsBedtime.isChecked() || bedtimeSync.isChecked()) {
+            powerSave.setEnabled(true);
+        }
+
         dndAsBedtime.setOnPreferenceChangeListener((preference, newValue) -> {
 
             if ((boolean) newValue) {
