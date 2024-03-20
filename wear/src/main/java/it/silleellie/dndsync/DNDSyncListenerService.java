@@ -2,6 +2,9 @@ package it.silleellie.dndsync;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -91,6 +94,26 @@ public class DNDSyncListenerService extends WearableListenerService {
                 } else {
                     Log.d(TAG, "Bedtime mode toggle failed");
                 }
+                if(Settings.Global.getInt(getApplicationContext().getContentResolver(), settingBedtimeStr, -1)==1) {
+                    Log.d(TAG, "Starting activity StBedtimeModeReservedActivity in 5 seconds");
+                    Intent intent = new Intent("android.intent.action.MAIN");
+                    intent.setClassName("com.google.android.apps.wearable.settings", "com.samsung.android.clockwork.settings.advanced.bedtimemode.StBedtimeModeReservedActivity");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    // Get the main looper (ensures association with the main thread)
+                    //Looper mainLooper = Looper.getMainLooper();
+                    // Create a Handler instance using the main looper
+                    //Handler handler = new Handler(mainLooper);
+                    // Handler for delayed execution
+                    //handler.postDelayed(new Runnable() {
+                    //    @Override
+                    //    public void run() {
+                    //        startActivity(intent);
+                    //        Log.d(TAG, "Started activity StBedtimeModeReservedActivity");
+                    //    }
+                    //}, 5000); // Delay in milliseconds (5 seconds = 5000 milliseconds
+                }
+
 
                 if(phoneSignal.powersavePref) {
 
