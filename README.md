@@ -1,5 +1,6 @@
 # Slep mode overlay
 This version forked from https://github.com/Silleellie/dnd-bedtime-sync enables a sleep overlay mode on Samsung galaxy watches. This behaviour is similar to what you will get if you hit the sleep mode quick setting button. Tested with Galaxy Watch 6.
+
 <img src="/images/photo1710872939.jpeg" width="200" />
 
 # DNDSync
