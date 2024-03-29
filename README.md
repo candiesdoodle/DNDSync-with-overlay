@@ -4,7 +4,7 @@ Provide an option to enable DND on the watch if the phone is connected to Androi
 There is also a switch for enabling power save mode when DND from AA is enabled. This helps save power when driving around.
 Additionally, atleast for now, if DND from AA is enabled, then the option for syncing DND back from watch to phone is disabled. This is to avoid circular conflicts (AA does not require DND on phone)
 
-<img src="/images/DND_from_AA.png width="100"/>
+<img src="/images/DND_from_AA.png" width="100"/>
 
 # Slep mode overlay
 This version forked from https://github.com/Silleellie/dnd-bedtime-sync enables a sleep overlay mode on Samsung galaxy watches. This behaviour is similar to what you will get if you hit the sleep mode quick setting button. Tested with Galaxy Watch 6.
