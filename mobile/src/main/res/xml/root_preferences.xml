@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     app:iconSpaceReserved="false">
 
     <PreferenceCategory app:title="@string/phone_sync_header"
@@ -34,7 +35,25 @@
             app:defaultValue="false"/>
 
     </PreferenceCategory>
+    <PreferenceCategory app:title="@string/AA_header"
+        app:iconSpaceReserved="false">
+    
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            app:key="android_auto_sync_key"
+            app:defaultValue="true"
+            app:title="@string/AA_monitor"
+            app:summary="@string/AA_monitor_desc" />
 
+        <SwitchPreferenceCompat
+            app:key="power_save_with_AA_key"
+            app:iconSpaceReserved="false"
+            app:enabled="false"
+            app:title="@string/enable_power_saving_with_AA_title"
+            app:summary="@string/enable_power_saving_with_AA_desc"
+            app:defaultValue="true"/>
+   </PreferenceCategory>
+   
     <PreferenceCategory app:title="@string/watch_sync_header"
         app:iconSpaceReserved="false">
 
@@ -61,7 +80,8 @@
             app:iconSpaceReserved="false"
             app:title="@string/dnd_permission_title"
             app:summary="@string/dnd_permission_not_allowed" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Test version" app:iconSpaceReserved="false">
 
     </PreferenceCategory>
-
 </PreferenceScreen>

@@ -6,18 +6,24 @@ import java.io.Serializable;
 
 public class PhoneSignal implements Serializable {
 
+    public boolean AANotif = false;
     // dndState and bedtimeState will be null if the signal to sent is not related
     // to those two states
     public Integer dndState = null;
     public Integer bedtimeState = null;
     public boolean powersavePref = false;
     public boolean vibratePref = false;
-
+    public boolean powersaveAAPref = false;
+    public Integer AAPowerState = null;
+    public boolean AASyncPref = false;
     public PhoneSignal(Integer dndState, SharedPreferences prefs) {
 
         boolean dndAsBedtime = prefs.getBoolean("dnd_as_bedtime_key", false);
+        this.AASyncPref = prefs.getBoolean("android_auto_sync_key", true);
         this.powersavePref = prefs.getBoolean("power_save_key", false);
+        this.powersaveAAPref = prefs.getBoolean("power_save_with_AA_key", true);
         this.vibratePref = prefs.getBoolean("watch_vibrate_key", false);
+        this.AANotif=prefs.getBoolean("android_auto_notif",false);
 
         // DnD disabled:
         // 0 = INTERRUPTION_FILTER_UNKNOWN
@@ -34,13 +40,21 @@ public class PhoneSignal implements Serializable {
         if (0 <= dndState && dndState <= 4) {
 
             this.dndState = dndState;
-
+            this.powersavePref=false;
             if (dndAsBedtime && dndState > 1) {
                 // dndState > 1 means that it's enabled
                 this.bedtimeState = 1;
+                this.powersavePref=true;
             } else if (dndAsBedtime) {
-                // in this branch dndState < 1, so it's disabled
+                // in this branch dndState < = 1, so it's disabled
                 this.bedtimeState = 0;
+                this.powersavePref=true;
+            }
+
+            if (this.AANotif && this.AASyncPref && this.powersaveAAPref && dndState==1)  {
+                this.AAPowerState = 0;
+            } else if (this.AANotif && this.AASyncPref && this.powersaveAAPref && dndState==2) {
+                this.AAPowerState = 1; //enable powersave on dnd state > 1
             }
 
         } else if (dndState == 5 || dndState == 6) {

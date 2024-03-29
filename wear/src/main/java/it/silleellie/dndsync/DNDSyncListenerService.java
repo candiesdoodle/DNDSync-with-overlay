@@ -3,8 +3,7 @@ package it.silleellie.dndsync;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
+
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -95,7 +94,7 @@ public class DNDSyncListenerService extends WearableListenerService {
                     Log.d(TAG, "Bedtime mode toggle failed");
                 }
                 if(Settings.Global.getInt(getApplicationContext().getContentResolver(), settingBedtimeStr, -1)==1) {
-                    Log.d(TAG, "Starting activity StBedtimeModeReservedActivity in 5 seconds");
+                    Log.d(TAG, "Starting activity StBedtimeModeReservedActivity");
                     Intent intent = new Intent("android.intent.action.MAIN");
                     intent.setClassName("com.google.android.apps.wearable.settings", "com.samsung.android.clockwork.settings.advanced.bedtimemode.StBedtimeModeReservedActivity");
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -125,12 +124,28 @@ public class DNDSyncListenerService extends WearableListenerService {
                     }
                 }
 
+
+
+
                 Log.d(TAG, "vibrate: " + phoneSignal.vibratePref);
                 if (phoneSignal.vibratePref) {
                     vibrate();
                 }
             }
 
+            Log.d(TAG, "phoneSignal.powersavePref " + phoneSignal.powersavePref);
+            Log.d(TAG, "phoneSignal.powersaveAAPref " + phoneSignal.powersaveAAPref);
+            Log.d(TAG, "phoneSignal.AASyncPref " + phoneSignal.AASyncPref);
+            Log.d(TAG, "phoneSignal.AAPowerState " + phoneSignal.AAPowerState);
+
+            if(phoneSignal.AAPowerState!=null && phoneSignal.powersaveAAPref) {
+                boolean powerModeAASuccess = changePowerModeSetting(phoneSignal.AAPowerState);
+                if(powerModeAASuccess) {
+                    Log.d(TAG, "Power Saver mode toggled");
+                } else {
+                    Log.d(TAG, "Power Saver mode toggle failed");
+                }
+            }
         } else {
             super.onMessageReceived(messageEvent);
         }

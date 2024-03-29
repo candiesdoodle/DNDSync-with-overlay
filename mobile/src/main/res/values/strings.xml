@@ -5,6 +5,7 @@
     <string name="permission_header">Permissions</string>
     <string name="phone_sync_header">Sync - Phone preferences</string>
     <string name="watch_sync_header">Sync - Watch preferences</string>
+    <string name="AA_header">Android Auto preferences</string>
 
     <!-- Phone Preferences -->
     <string name="sync_dnd_title">Sync DND state to watch</string>
@@ -17,11 +18,11 @@
     <string name="sync_dnd_as_bedtime_desc">If enabled, DND changes on the phone will enable/disable Bedtime mode on the watch</string>
 
     <string name="enable_power_saving_title">Enable Power Save mode with Bedtime</string>
-    <string name="enable_power_saving_desc">Bedtime mode will also enable power save mode on the watch</string>
+    <string name="enable_power_saving_desc">Bedtime mode will also enable power save mode on the watch.\nManually switching off Bedtime mode on watch will NOT switch off power save mode. Switching off Bedtime mode on phone will switch off power save mode on watch</string>
 
     <!-- Watch Preferences -->
     <string name="watch_sync_dnd_title">Sync DND state to phone</string>
-    <string name="watch_sync_dnd_desc">If enabled, a DND change on the watch will lead to a DND change on the phone</string>
+    <string name="watch_sync_dnd_desc">If enabled, a DND change on the watch will lead to a DND change on the phone. \nIf \"DND on Android Auto\" above is enabled, this option will be disabled as it may lead to conflict</string>
 
     <string name="watch_vibrate_title">Vibrate on sync</string>
     <string name="watch_vibrate_desc">If enabled, 1 small vibration for DND sync, 2 small vibrations for DND and Bedtime sync</string>
@@ -30,5 +31,12 @@
     <string name="dnd_permission_title">DND-Bedtime Permission</string>
     <string name="dnd_permission_allowed">DND-Bedtime access granted</string>
     <string name="dnd_permission_not_allowed">DND-Bedtime access denied</string>
+
+    <!-- AA preferences -->
+    <string name="AA_monitor">Monitor for Android Auto connections on phone</string>
+    <string name="AA_monitor_desc">Force DND on watch if connected to a Android Auto on phone. \nIf this is enabled, then \"Sync DND state to phone\" below will be disabled as it may lead to conflict</string>
+    <string name="enable_power_saving_with_AA_title">Enable Power Save mode with Android Auto</string>
+    <string name="enable_power_saving_with_AA_desc">AA mode will also enable power save mode on the watch</string>
+
 
 </resources>

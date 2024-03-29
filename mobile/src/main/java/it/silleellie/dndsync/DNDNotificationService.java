@@ -1,10 +1,9 @@
 package it.silleellie.dndsync;
-
-
 import android.content.SharedPreferences;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+
 import androidx.preference.PreferenceManager;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -25,8 +24,28 @@ public class DNDNotificationService extends NotificationListenerService {
     private static final String DND_SYNC_MESSAGE_PATH = "/wear-dnd-sync";
 
     private boolean isWindDownNotification(StatusBarNotification sbn) {
+        /*Log.d(TAG,sbn.getPackageName());
+        Log.d(TAG,sbn.getNotification().getChannelId());
+        Notification notification = sbn.getNotification();
+
+        // Extract the text from the notification extras
+        String text = notification.extras.getString(Notification.EXTRA_TEXT);
+
+        // If the text is not found under EXTRA_TEXT, try other keys
+        if (text == null) {
+            text = notification.extras.getString(Notification.EXTRA_TITLE);
+        }
+        if (text == null) {
+            text = notification.extras.getString(Notification.EXTRA_BIG_TEXT);
+        }
+        Log.d(TAG,text);*/
         return sbn.getPackageName().equals("com.google.android.apps.wellbeing") &&
                 sbn.getNotification().getChannelId().equals("wind_down_notifications");
+    }
+
+    private boolean isAAnotification(StatusBarNotification sbn) {
+        return sbn.getPackageName().equals("com.google.android.projection.gearhead") &&
+                sbn.getNotification().getChannelId().equals("car.default_notification_channel");
     }
 
     @Override
@@ -36,7 +55,8 @@ public class DNDNotificationService extends NotificationListenerService {
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             boolean syncBedTime = prefs.getBoolean("bedtime_sync_key", true);
-
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("android_auto_notif", false);
             if(syncBedTime) {
                 // depending on the number of actions that can be done, bedtime mode
                 // could be in "pause mode" or "on mode":
@@ -58,6 +78,21 @@ public class DNDNotificationService extends NotificationListenerService {
                 }
             }
         }
+        //else Toast.makeText(this, isNotWindDownNotification(sbn), Toast.LENGTH_LONG).show();
+        else if (isAAnotification(sbn)) {
+            Log.d(TAG, "AA mode detected");
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("android_auto_notif", true);
+            editor.apply();
+            boolean AA_dnd = prefs.getBoolean("android_auto_sync_key", true);
+            //if AA is detected set interruption filter to 2 that is DND enabled
+            if (AA_dnd) {
+                Log.d(TAG, "AA mode DND sync is on");
+                int interruptionFilter = 2;
+                new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
+            }
+        }
     }
 
     @Override
@@ -66,11 +101,25 @@ public class DNDNotificationService extends NotificationListenerService {
         if(isWindDownNotification(sbn)) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             boolean syncBedTime = prefs.getBoolean("bedtime_sync_key", true);
-
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("android_auto_notif", false);
             if (syncBedTime) {
                 // 6 means bedtime OFF
                 Log.d(TAG, "bedtime mode is off");
                 int interruptionFilter = 6;
+                new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
+            }
+        }
+        else if (isAAnotification(sbn)) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean AA_dnd = prefs.getBoolean("android_auto_sync_key", true);
+            Log.d(TAG, "AA mode OFF detected");
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("android_auto_notif", true);
+            editor.apply();
+            //if AA is detected OFF set interruption filter to 1 that is DND disabled
+            if (AA_dnd) {
+                int interruptionFilter = 1;
                 new Thread(() -> sendDNDSync(new PhoneSignal(interruptionFilter, prefs))).start();
             }
         }
