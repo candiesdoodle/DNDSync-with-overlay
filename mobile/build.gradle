@@ -25,15 +25,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    sourceSets {
-        main {
-            java {
-                exclude 'it/silleellie/dndsync/BluetoothDevicePreferenceFragment.java'
-                exclude 'it/silleellie/dndsync/BluetoothDeviceSelectionActivity.java'
-            }
-        }
-    }
 }
 
 dependencies {

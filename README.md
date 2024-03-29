@@ -1,10 +1,4 @@
-# Enable option for DND when Android Auto is connected on phone. Can also force power save on watch when DND due to AA is connected
-These edits provide an option to enable DND on the watch if the phone is connected to Android Auto. This ensures that notifications do not disturb when driving a car. AA already shows the notifications for important apps like messaging and calls, on the car screen. There should not be any need for additional disturbances when driving.
-There is also a switch for enabling power save mode when DND from AA is enabled. This helps save power when driving around.
-Additionally, atleast for now, if DND from AA is enabled, then the option for syncing DND back from watch to phone is disabled. This is to avoid circular conflicts (AA does not require DND on phone)
-<img src="images/DND_from_AA.png width="100"/>
-
-# Sleep mode overlay
+# Slep mode overlay
 This version forked from https://github.com/Silleellie/dnd-bedtime-sync enables a sleep overlay mode on Samsung galaxy watches. This behaviour is similar to what you will get if you hit the sleep mode quick setting button. Tested with Galaxy Watch 6.
 
 <img src="/images/photo1710872939.jpeg" width="200" />
